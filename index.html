@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Viewer - PG7 Cable Gland</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 1200px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .viewer-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            background: #f5f5f5;
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            background: #f9f9f9;
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .info-panel {
+            background: white;
+            padding: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .info-panel strong {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .viewer-container {
+                height: 400px;
+            }
+
+            .controls {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>3D Model Viewer</h1>
+            <p>PG7 Cable Gland</p>
+        </div>
+
+        <div class="viewer-container">
+            <model-viewer 
+                id="modelViewer"
+                src="PG7 Cable Gland.gltf"
+                alt="PG7 Cable Gland 3D Model"
+                auto-rotate
+                camera-controls
+                shadow-intensity="1"
+                exposure="1"
+                environment-image="neutral"
+            >
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                </div>
+            </model-viewer>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <button onclick="toggleAutoRotate()">Toggle Auto-Rotate</button>
+                <button onclick="resetCamera()">Reset Camera</button>
+                <button onclick="toggleShadow()">Toggle Shadow</button>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <strong>Controls:</strong>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><strong>Rotate:</strong> Click and drag with mouse</li>
+                <li><strong>Zoom:</strong> Scroll mouse wheel or pinch on touch</li>
+                <li><strong>Pan:</strong> Right-click and drag (or Ctrl + Left-click)</li>
+                <li><strong>Auto-Rotate:</strong> Model automatically rotates on load</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Import Google's model-viewer library -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+
+    <script>
+        const viewer = document.getElementById('modelViewer');
+        const loading = document.getElementById('loading');
+
+        // Hide loading spinner when model is loaded
+        viewer.addEventListener('load', () => {
+            loading.style.display = 'none';
+        });
+
+        // Handle loading error
+        viewer.addEventListener('error', (event) => {
+            console.error('Error loading model:', event);
+            loading.innerHTML = '<p style="color: red; font-weight: bold;">Error loading model. Please ensure the file path is correct.</p>';
+        });
+
+        // Toggle auto-rotate
+        function toggleAutoRotate() {
+            if (viewer.autoRotate) {
+                viewer.autoRotate = false;
+            } else {
+                viewer.autoRotate = true;
+            }
+        }
+
+        // Reset camera to initial position
+        function resetCamera() {
+            viewer.resetTurntable();
+        }
+
+        // Toggle shadow
+        function toggleShadow() {
+            const currentShadow = parseFloat(viewer.getAttribute('shadow-intensity'));
+            const newShadow = currentShadow > 0 ? 0 : 1;
+            viewer.setAttribute('shadow-intensity', newShadow);
+        }
+    </script>
+</body>
+</html>
